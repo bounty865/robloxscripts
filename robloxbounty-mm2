@@ -1,10 +1,53 @@
-local scriptUrl = "https://raw.githubusercontent.com/SoyAdriYT/Scorpion/refs/heads/main/Games/Murder%20Mistery%202.lua"
+-- Téléportation automatique vers les pièces et protection en hauteur après la collecte
 
-local success, errorMessage = pcall(function()
-    local response = game:HttpGet(scriptUrl)
-    loadstring(response)()
-end)
+-- Variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local protectionHeight = 50 -- Hauteur de téléportation pour se mettre à l'abri
+local delayInAir = 1 -- Temps d'attente dans les airs après la collecte
 
-if not success then
-    warn("An error occurred: " .. tostring(errorMessage))
+-- Fonction pour trouver la pièce la plus proche
+local function findClosestCoin()
+    local closestCoin = nil
+    local closestDistance = math.huge
+
+    for _, object in pairs(workspace:GetChildren()) do
+        if object:IsA("Part") and object.Name == "Coin" then -- Assure-toi que les pièces s'appellent bien "Coin"
+            local distance = (object.Position - humanoidRootPart.Position).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestCoin = object
+            end
+        end
+    end
+    return closestCoin
 end
+
+-- Fonction pour téléporter le joueur vers une pièce
+local function teleportToCoin()
+    while true do
+        local coin = findClosestCoin()
+
+        if coin then
+            -- Téléporte vers la pièce
+            humanoidRootPart.CFrame = CFrame.new(coin.Position)
+            print("Téléporté à la pièce")
+
+            -- Immédiatement téléporter en hauteur pour protection
+            local protectionPosition = humanoidRootPart.Position + Vector3.new(0, protectionHeight, 0)
+            humanoidRootPart.CFrame = CFrame.new(protectionPosition)
+            print("Téléporté en hauteur pour protection")
+
+            -- Attendre 1 seconde dans les airs
+            wait(delayInAir)
+
+        else
+            print("Aucune pièce trouvée")
+            wait(0.1) -- Attendre un peu avant de réessayer de trouver une pièce
+        end
+    end
+end
+
+-- Lancer le script de téléportation en arrière-plan
+spawn(teleportToCoin)
