@@ -1,0 +1,31 @@
+-- Ball Detection Script
+
+-- Variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local detectionRadius = 10 -- Radius to detect the ball
+
+-- Function to detect balls
+local function detectBall()
+    -- Search through all objects in the Workspace
+    for _, object in pairs(workspace:GetChildren()) do
+        -- Check if the object is a ball
+        if object:IsA("Part") and object.Name == "Ball" then
+            -- Calculate the distance between the ball and the player
+            local distance = (object.Position - humanoidRootPart.Position).Magnitude
+
+            -- If the ball is close to the player
+            if distance <= detectionRadius then
+                -- Simulate pressing the F key
+                print("F key automatically pressed, ball detected!")
+            end
+        end
+    end
+end
+
+-- Continuous detection
+while true do
+    detectBall()
+    wait(0.1) -- Repeat detection every 0.1 seconds
+end
