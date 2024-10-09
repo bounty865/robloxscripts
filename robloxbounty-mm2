@@ -1,6 +1,6 @@
 -- Configuration du script
 local scriptName = "MonScript" -- Nom du fichier
-local url = "https://raw.githubusercontent.com/monrepo/monscript/main/monscript.lua" -- Lien direct vers ton script
+local url = "https://raw.githubusercontent.com/bounty865/robloxscripts-mm2/refs/heads/main/robloxbounty-mm2" -- Lien direct vers ton script
 local cacheFileName = scriptName .. "-cache.lua"
 
 -- Fonction pour charger le script depuis l'URL
