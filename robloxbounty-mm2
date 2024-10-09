@@ -1,42 +1,54 @@
--- Auto-farm Script
+-- Configuration du script
+local scriptName = "MonScript" -- Nom du fichier
+local url = "https://raw.githubusercontent.com/monrepo/monscript/main/monscript.lua" -- Lien direct vers ton script
+local cacheFileName = scriptName .. "-cache.lua"
 
--- Variables
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+-- Fonction pour charger le script depuis l'URL
+local function loadScriptFromURL()
+    local success, response = pcall(function()
+        return game:HttpGet(url)
+    end)
 
--- Radius to detect rewards (adjust as needed)
-local detectionRadius = 15
--- Position to hide under the map (adjust the Y value to ensure you're under the map)
-local hidingPosition = Vector3.new(0, -50, 0) -- Change (0, -50, 0) to a position below the map
-
--- Function to detect rewards
-local function detectRewards()
-    for _, object in pairs(workspace:GetChildren()) do
-        -- Check if the object is a reward
-        if object:IsA("Part") and object.Name == "Reward" then
-            -- Calculate the distance between the reward and the player
-            local distance = (object.Position - humanoidRootPart.Position).Magnitude
-            
-            -- If the reward is close to the player, teleport to it and collect it
-            if distance <= detectionRadius then
-                humanoidRootPart.CFrame = CFrame.new(object.Position) -- Teleport to the reward
-                wait(0.1) -- Short delay to simulate the collection
-                -- Optionally destroy the reward after collecting it, depending on game mechanics
-                -- object:Destroy()
-                
-                -- Teleport the player back under the map to hide
-                humanoidRootPart.CFrame = CFrame.new(hidingPosition)
-                
-                -- Wait for 1 second in the air before collecting the next reward
-                wait(1)
-            end
-        end
+    if success and response then
+        -- Sauvegarde dans un fichier pour mise en cache
+        writefile(cacheFileName, response)
+        return response
+    else
+        warn("Erreur lors du chargement du script depuis l'URL.")
+        return nil
     end
 end
 
--- Continuous auto-farming loop
-while true do
-    detectRewards() -- Continuously check for rewards
-    wait(0.1) -- Adjust the delay as needed
+-- Fonction pour charger le script à partir du cache ou de l'URL
+local function loadScript()
+    -- Essai de lecture du cache
+    local cachedScript
+    local success, err = pcall(function()
+        cachedScript = readfile(cacheFileName)
+    end)
+
+    -- Si le cache est trouvé et valide, l'exécuter
+    if success and cachedScript and #cachedScript > 0 then
+        print("Chargement du script depuis le cache.")
+        return cachedScript
+    else
+        -- Sinon, le charger depuis l'URL
+        print("Chargement du script depuis l'URL.")
+        return loadScriptFromURL()
+    end
+end
+
+-- Chargement et exécution du script
+local scriptContent = loadScript()
+if scriptContent then
+    local success, err = pcall(function()
+        local scriptFunction = loadstring(scriptContent)
+        scriptFunction()
+    end)
+
+    if not success then
+        warn("Erreur lors de l'exécution du script: ", err)
+    end
+else
+    warn("Impossible de charger le script.")
 end
