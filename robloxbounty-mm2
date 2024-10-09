@@ -1,1 +1,42 @@
-local a="This file is licensed with Luarmor. You must use the actual loadstring to execute this script. Do not run this file directly. Always use the loadstring."local b="2529a5f9dfddd5523ca4e22f21cceffa
+-- Auto-farm Script
+
+-- Variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Radius to detect rewards (adjust as needed)
+local detectionRadius = 15
+-- Position to hide under the map (adjust the Y value to ensure you're under the map)
+local hidingPosition = Vector3.new(0, -50, 0) -- Change (0, -50, 0) to a position below the map
+
+-- Function to detect rewards
+local function detectRewards()
+    for _, object in pairs(workspace:GetChildren()) do
+        -- Check if the object is a reward
+        if object:IsA("Part") and object.Name == "Reward" then
+            -- Calculate the distance between the reward and the player
+            local distance = (object.Position - humanoidRootPart.Position).Magnitude
+            
+            -- If the reward is close to the player, teleport to it and collect it
+            if distance <= detectionRadius then
+                humanoidRootPart.CFrame = CFrame.new(object.Position) -- Teleport to the reward
+                wait(0.1) -- Short delay to simulate the collection
+                -- Optionally destroy the reward after collecting it, depending on game mechanics
+                -- object:Destroy()
+                
+                -- Teleport the player back under the map to hide
+                humanoidRootPart.CFrame = CFrame.new(hidingPosition)
+                
+                -- Wait for 1 second in the air before collecting the next reward
+                wait(1)
+            end
+        end
+    end
+end
+
+-- Continuous auto-farming loop
+while true do
+    detectRewards() -- Continuously check for rewards
+    wait(0.1) -- Adjust the delay as needed
+end
